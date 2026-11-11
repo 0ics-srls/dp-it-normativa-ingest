@@ -2,13 +2,13 @@
   "specVersion": "1.1",
   "type": "stdin",
   "name": "dp-it-normativa-ingest",
-  "version": "0.1.1",
-  "description": "Loads the convert plan files of the given acts into the ds_it_normativa dataset: history rows replaced, units / acts / akn_documents upserted, one transaction per act. Embeddings are kept when the text is unchanged.",
+  "version": "0.1.2",
+  "description": "Loads the convert plan files into the ds_it_normativa dataset: history replaced, units / acts / akn_documents upserted, one transaction per act. Embeddings kept when the text is unchanged.",
   "author": "open-lex-it",
   "authentication": false,
   "actions": {
     "execute": {
-      "description": "For each item read <dirIn>/<stem>.plan.json and <stem>.akn.xml and write the act in one transaction. A failed act is rolled back, the others are kept; the run then ends with system_error listing the failed keys.",
+      "description": "For each item read <dirIn>/<stem>.plan.json and .akn.xml, write the act in one transaction. A failed act is rolled back; the run ends with system_error listing the failed keys.",
       "input": {
         "type": "object",
         "properties": {
