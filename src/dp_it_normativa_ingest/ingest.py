@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from dp_it_normativa_ingest.repository import Cursor
 
-KIND_NORMATTIVA = "normattiva"
+KINDS = ("normattiva", "gu")
 _SCHEMA = re.compile(r"^ds_[a-z0-9_]+$")
 _UNSAFE = re.compile(r"[^A-Za-z0-9._-]")
 
@@ -42,8 +42,8 @@ def _validate(params: dict[str, Any]) -> tuple[list[dict[str, Any]], Path, str, 
         raise IngestError(CONFIG_ERROR, "items must be a non-empty array")
     for entry in items:
         meta = entry.get("meta") if isinstance(entry, dict) else None
-        if not isinstance(entry, dict) or not entry.get("key") or not isinstance(meta, dict) or meta.get("kind") != KIND_NORMATTIVA:
-            raise IngestError(CONFIG_ERROR, f"item needs a key and meta.kind '{KIND_NORMATTIVA}': {entry!r}")
+        if not isinstance(entry, dict) or not entry.get("key") or not isinstance(meta, dict) or meta.get("kind") not in KINDS:
+            raise IngestError(CONFIG_ERROR, f"item needs a key and meta.kind one of {list(KINDS)}: {entry!r}")
         if not isinstance(meta.get("actId"), str) or not meta["actId"]:
             raise IngestError(CONFIG_ERROR, f"item {entry['key']}: meta.actId is required")
     directory, conn_string, schema = params.get("dirIn"), params.get("connString"), params.get("schema")

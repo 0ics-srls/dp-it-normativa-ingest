@@ -216,3 +216,16 @@ def test_progress_is_reported_per_act(tmp_path: Path) -> None:
 
     assert seen == [100]
     assert STEM
+
+
+def test_a_gu_item_is_loaded_like_a_normattiva_one(tmp_path: Path) -> None:
+    gu_stem = "gu_26G00178"
+    write_files(tmp_path, plan_doc(), stem=gu_stem, xml="<html>stampa</html>")
+    connection = FakeConnection()
+    gu_item = {"key": "gu:26G00178|v1", "meta": {"kind": "gu", "actId": "gu:26G00178", "codiceRedazionale": "26G00178"}}
+
+    result = run_ingest({**params(tmp_path), "items": [gu_item]}, lambda _dsn: connection, lambda *_: None)
+
+    assert result["metrics"]["acts"] == 1
+    akn = next(entry for entry in connection.log if "INSERT INTO akn_documents" in entry[1])
+    assert akn[2][3] == "<html>stampa</html>"
