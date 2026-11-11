@@ -2,7 +2,7 @@
   "specVersion": "1.1",
   "type": "stdin",
   "name": "dp-it-normativa-ingest",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Loads the convert plan files into the ds_it_normativa dataset: history replaced, units / acts / akn_documents upserted, one transaction per act. Embeddings kept when the text is unchanged.",
   "author": "open-lex-it",
   "authentication": false,
