@@ -1,0 +1,53 @@
+{
+  "specVersion": "1.1",
+  "type": "stdin",
+  "name": "dp-it-normativa-ingest",
+  "version": "0.1.0",
+  "description": "Loads the convert plan files of the given acts into the ds_it_normativa dataset: history rows replaced, units / acts / akn_documents upserted, one transaction per act. Embeddings are kept when the text is unchanged.",
+  "author": "open-lex-it",
+  "authentication": false,
+  "actions": {
+    "execute": {
+      "description": "For each item read <dirIn>/<stem>.plan.json and <stem>.akn.xml and write the act in one transaction. A failed act is rolled back, the others are kept; the run then ends with system_error listing the failed keys.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "the acts to load, as reported by the detect step",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string", "minLength": 1 },
+                "meta": {
+                  "type": "object",
+                  "properties": { "kind": { "const": "normattiva" }, "actId": { "type": "string" } },
+                  "required": ["kind", "actId"]
+                }
+              },
+              "required": ["key", "meta"]
+            }
+          },
+          "dirIn": { "type": "string", "description": "directory with the convert output" },
+          "connString": { "type": "string", "x-secret": true, "description": "dataset connection string (Npgsql or libpq), never logged" },
+          "schema": { "type": "string", "pattern": "^ds_[a-z0-9_]+$", "description": "dataset schema" },
+          "collectionPriority": { "type": "array", "items": { "type": "string" }, "description": "collection labels, most important first; an existing label is never downgraded" }
+        },
+        "required": ["items", "dirIn", "connString", "schema"]
+      },
+      "output": {
+        "type": "object",
+        "description": "{ metrics: {acts, written.<schema>.<table>}, acts: [{key, act_urn, units, version_rows}] }"
+      }
+    },
+    "terminate": {
+      "description": "Stop and clean up.",
+      "input": { "type": "object", "properties": {} }
+    }
+  },
+  "execution": {
+    "timeout": 1800,
+    "memoryLimit": "512Mi",
+    "cpuLimit": "0.5"
+  }
+}
