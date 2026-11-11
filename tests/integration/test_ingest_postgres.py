@@ -19,8 +19,17 @@ if TYPE_CHECKING:
 pytestmark = pytest.mark.integration
 
 SCHEMA = "ds_it_normativa"
-MIGRATIONS = Path(__file__).resolve().parents[4] / "dp-it-normativa" / "schema" / "migrations"
 VECTOR = "[" + ",".join(["0.25"] * 1024) + "]"
+
+
+def migrations_dir() -> Path:
+    """The package migrations next to this class repo; resolved lazily so collecting the module in a container (no sibling repo) cannot fail."""
+    for parent in Path(__file__).resolve().parents:
+        candidate = parent / "dp-it-normativa" / "schema" / "migrations"
+        if candidate.is_dir():
+            return candidate
+    msg = "package migrations (dp-it-normativa/schema/migrations) not found next to this repo"
+    raise FileNotFoundError(msg)
 
 
 class Db:
@@ -60,7 +69,7 @@ def db(container: PostgresContainer) -> Db:
     database.execute(f"CREATE SCHEMA {SCHEMA}")
     with psycopg.connect(database.dsn, autocommit=True) as conn:
         conn.execute(f"SET search_path TO {SCHEMA}, public")
-        for migration in sorted(MIGRATIONS.glob("*.sql")):
+        for migration in sorted(migrations_dir().glob("*.sql")):
             conn.execute(migration.read_text(encoding="utf-8"))
     return database
 
